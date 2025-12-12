@@ -1,0 +1,49 @@
+BLACKJACK & MONTE CARLO REINFORCEMENT LEARNING SUMMARY
+======================================================
+
+1. BLACKJACK EXPLAINED
+----------------------
+Blackjack (also known as Twenty-One) is a card game where players compete against the dealer.
+
+Goal:
+Beat the dealer's hand without going over 21.
+
+Card Values:
+- Face cards (Kings, Queens, Jacks) are worth 10.
+- Number cards (2-10) are worth their face value.
+- Aces are worth 1 or 11 (whichever is better).
+
+The Play:
+1. The player is dealt two cards.
+2. The dealer is dealt two cards, one face up (visible) and one face down (hidden).
+3. The player has two main actions:
+   - Hit: Take another card.
+   - Stick (Stand): Stop taking cards and keep the current total.
+4. If the player's total exceeds 21, they "bust" and lose immediately.
+5. If the player sticks, the dealer reveals their hidden card and must hit until their total is 17 or higher.
+6. If the dealer busts (goes over 21), the player wins (if they haven't already busted).
+7. If neither busts, the higher total wins. A tie is a "push" (draw).
+
+2. WHY MONTE CARLO FOR THIS TASK?
+---------------------------------
+Monte Carlo (MC) methods are well-suited for Blackjack for several reasons:
+
+- Episodic Nature: Blackjack games are always separate "episodes" that end in a Win, Loss, or Draw. MC learns from these complete episodes.
+- Unknown Dynamics: We don't need to calculate exact probabilities of card draws. The agent learns simply by playing many games and observing the played cards.
+- State Space: The game state (Player Sum 4-21, Dealer Card 1-10, Usable Ace Y/N) is small enough for a table but complex enough to require learning.
+- Delayed Reward: The result (Win/Loss) is only known at the very end. MC naturally handles this by propagating the final result back to all actions taken during the hand.
+
+3. METRICS COMPARISON
+---------------------
+In Blackjack, even a perfect strategy cannot win every time due to the luck of the draw.
+
+Metric       | Ideal Strategy | Random Strategy | Trained MC Agent
+----------------------------------------------------------------
+Win Rate     | ~42.5 - 43.0%  | ~28.0%          | ~43.0%
+Loss Rate    | ~49.0%         | ~67.0%          | ~48.0%
+Draw Rate    | ~8.5%          | ~5.0%           | ~9.0%
+
+(Note: Percentages may vary slightly based on specific house rules.)
+
+Why not 100%?
+The casino ("the house") always has a slight statistical advantage. The goal of our AI agent is to find the "Optimal Policy" that minimizes this advantage, typically achieving a win rate of around 43%.

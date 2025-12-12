@@ -1,0 +1,54 @@
+MONTE CARLO AGENT FLOW DESCRIPTION
+==================================
+
+1. TRAINING FLOW (train.py)
+---------------------------
+The training process uses the First-Visit Monte Carlo method to learn the optimal policy.
+
+A. INITIALIZATION
+   - Create Blackjack environment (Gymnasium).
+   - Initialize Q-table (a dictionary mapping states to action values).
+   - Initialize Returns dictionary (stores all returns for each state-action pair).
+   - Set hyperparameters (Epsilon, Gamma, Decay Rate).
+
+B. EPISODE LOOP (Repeats 500,000 times)
+   1. Reset Environment: Start a new game.
+   2. Play Episode:
+      - Choose action using Epsilon-Greedy policy (Explore vs Exploit).
+      - Step environment (Hit or Stick).
+      - Store (State, Action, Reward) in a list.
+      - Repeat until game ends (Terminal state).
+
+C. MONTE CARLO UPDATE (End of Episode)
+   1. Calculate Return (G): Iterate backwards from the last step of the episode.
+   2. First-Visit Check: For each step, check if this (State, Action) pair occurred earlier in the episode.
+   3. Update:
+      - If it is the first visit, add G to the Returns list for that pair.
+      - Update Q-value = Average of all Returns for that pair.
+
+D. FINALIZATION
+   - Decay Epsilon (reduce exploration).
+   - Log win rates periodically.
+   - Save the learnt Q-table to 'blackjack_mc.pkl'.
+   - Generate and save 'training_plot.png'.
+
+
+2. EVALUATION FLOW (eval.py)
+----------------------------
+The evaluation process tests the trained agent's performance without exploration.
+
+A. SETUP
+   - Create Blackjack environment.
+   - Load 'blackjack_mc.pkl' (the Q-table created during training).
+
+B. STATISTICAL EVALUATION (100,000 Episodes)
+   1. Reset Environment.
+   2. Play Episode using Greedy Policy (Always choose action with highest Q-value).
+   3. Record result (Win, Loss, or Draw).
+   4. Calculate and print aggregate Win Rate.
+
+C. VISUAL DEMO
+   1. Re-initialize environment with 'render_mode="human"' (Pygame).
+   2. Play 5 episodes using the Greedy Policy.
+   3. Display the game window so the user can watch the agent playing.
+
