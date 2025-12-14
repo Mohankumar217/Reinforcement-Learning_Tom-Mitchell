@@ -1,0 +1,29 @@
+TD(lambda) - Temporal Difference Learning with Value Function V(s)
+
+Explanation:
+This algorithm applies the concept of Eligibility Traces to learning the State-Value Function V(s). It bridges the gap between TD(0) (1-step updates) and Monte Carlo (episode-long updates).
+
+1. Value Function V(s) & Traces E(s):
+   - We maintain a Value Table V(s) for each state.
+   - We also maintain an Eligibility Trace E(s) for each state, indicating how "eligible" a state is for a credit assignment from a current error.
+
+2. The Update Logic:
+   - When a transition S -> S' occurs with Reward R:
+     1. Calculate TD Error: delta = R + gamma * V(S') - V(S)
+     2. Update Trace for S: E(S) <- E(S) + 1 (Accumulating)
+     3. Update V for ALL states s: V(s) <- V(s) + alpha * delta * E(s)
+     4. Decay Traces for ALL states s: E(s) <- gamma * lambda * E(s)
+
+3. Comparison: Sarsa(lambda) vs TD(lambda):
+   - Sarsa(lambda) learns Q(s,a) and updates E(s,a). It is model-free control.
+   - Plain TD(lambda) learns V(s) and updates E(s). To use it for control (action selection), it requires a model (env.P) to look ahead, as V(s) alone doesn't distinguish between actions.
+
+4. Hyperparameters used:
+   - Lambda = 0.6
+   - Alpha = 0.1
+   - Gamma = 0.99
+   - Episodes = 20000
+
+5. Measured Performance:
+   - Previous Sarsa(lambda=0.6) achieved ~73%.
+   - This implementation learns V(s) directly using the same parameters.

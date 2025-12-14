@@ -1,0 +1,36 @@
+TD(lambda) with V(s) - Algorithm Flow
+
+1. Initialization
+   - Create FrozenLake-v1 environment.
+   - Initialize Value Table V(s) = 0.
+   - Set parameters: alpha, gamma, lambda, epsilon.
+
+2. Training Loop (for each episode)
+   a. Reset Environment -> State S.
+   b. Initialize Eligibility Traces E(s) = 0 (size: Num States).
+
+   c. Episode Loop (while not Done)
+      i.   Choose Action A
+           - Use epsilon-greedy with lookahead on V(s) using env.P.
+
+      ii.  Take Action A
+           - Observe R, S'.
+
+      iii. Calculate TD Error (delta)
+           - delta = R + gamma * V(S') - V(S)
+
+      iv.  Update Traces
+           - E(S) = E(S) + 1
+
+      v.   Update Values and Decay Traces (Global Update)
+           - For all s:
+             V(s) = V(s) + alpha * delta * E(s)
+             E(s) = gamma * lambda * E(s)
+
+      vi.  Transition
+           - S <- S'
+
+   d. Decay Epsilon
+
+3. Output
+   - Save V-table to 'v_table.pkl'.
