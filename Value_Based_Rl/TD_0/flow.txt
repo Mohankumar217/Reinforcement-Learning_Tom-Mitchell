@@ -1,44 +1,34 @@
-Q-Learning Algorithm Flow
+TD(0) with V(s) Algorithm Flow
 
 1. Initialization
-   - Create the FrozenLake-v1 environment (is_slippery=True).
-   - Initialize Q-table with zeros (States x Actions).
-   - Set hyperparameters:
-     - Learning Rate (alpha)
-     - Discount Factor (gamma)
-     - Exploration Rate (epsilon)
+   - Create FrozenLake-v1 environment.
+   - Initialize Value Table V(s) with zeros (Size: Num States).
+   - Set parameters: alpha, gamma, epsilon.
 
 2. Training Loop (for each episode)
-   a. Reset Environment
-      - Get initial state S.
-      - Set Done = False.
+   a. Reset Environment to get initial State S.
 
    b. Episode Loop (while not Done)
-      i.   Choose Action A (Epsilon-Greedy)
-           - With probability epsilon, choose a random action.
-           - Otherwise, choose action with max Q-value for S: argmax(Q[S]).
+      i.   Choose Action A
+           - Get Lookahead Values using env.P (Model):
+             For each action a':
+               Value(a') = Sum(P(s'|s,a') * [R + gamma * V(s')])
+           - Epsilon-Greedy:
+             - Random (prob epsilon)
+             - Max Value (prob 1-epsilon)
 
       ii.  Take Action A
-           - Observe Reward R and Next State S'.
-           - Check if episode is terminated/truncated.
+           - Observe Reward R, Next State S'.
 
-      iii. Update Q-Value (TD Update)
-           - Find max Q-value for next state: best_next_Q = max(Q[S']).
-           - Calculate Target: Target = R + gamma * best_next_Q.
-           - Calculate Error: Error = Target - Q[S, A].
-           - Update: Q[S, A] = Q[S, A] + alpha * Error.
+      iii. Update V(s) (TD Update)
+           - Target = R + gamma * V(S')
+           - Error = Target - V(S)
+           - V(S) = V(S) + alpha * Error
 
       iv.  Transition
-           - S <- S'.
+           - S <- S'
 
    c. Decay Epsilon
-      - Reduce epsilon to decrease exploration over time.
 
 3. Output
-   - Save the trained Q-table to 'q_table.pkl'.
-   - Plot the learning curve (Rewards vs Episodes).
-
-4. Evaluation (Separate Step)
-   - Load 'q_table.pkl'.
-   - Run agent greedily (choose max Q-value).
-   - Measure success rate (average reward).
+   - Save trained V-table to 'v_table.pkl'.

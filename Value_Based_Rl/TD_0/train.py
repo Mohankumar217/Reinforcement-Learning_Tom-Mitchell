@@ -4,21 +4,45 @@ import pickle
 import matplotlib.pyplot as plt
 import os
 
+def get_best_action(env, state, v_table, gamma):
+    """
+    Selects the best action using one-step lookahead with the environment model (env.P)
+    and the current Value Function V(s).
+    Returns: best_action
+    """
+    best_action = 0
+    max_value = -float('inf')
+    
+    # Check all possible actions
+    for action in range(env.action_space.n):
+        expected_value = 0
+        # Iterate over possible outcomes for this action (prob, next_state, reward, done)
+        for prob, next_state, reward, done in env.unwrapped.P[state][action]:
+            # Calculate value: Immediate Reward + Discounted Future Value
+            target = reward + gamma * v_table[next_state] * (not done)
+            expected_value += prob * target
+            
+        if expected_value > max_value:
+            max_value = expected_value
+            best_action = action
+            
+    return best_action
+
 def train(episodes=10000, alpha=0.1, gamma=0.99, epsilon=1.0, epsilon_decay=0.9995, min_epsilon=0.01):
     """
-    Trains an agent on FrozenLake-v1 using Q-Learning (TD(0)).
+    Trains an agent on FrozenLake-v1 using TD(0) with state values V(s).
+    Uses the environment model for action selection (lookahead).
     """
     # Create environment
     env = gym.make('FrozenLake-v1', is_slippery=True)
     
-    # Initialize Q-table 
+    # Initialize V-table (State Values)
     n_states = env.observation_space.n
-    n_actions = env.action_space.n
-    q_table = np.zeros((n_states, n_actions))
+    v_table = np.zeros(n_states)
     
     rewards_history = []
     
-    print("Starting training...")
+    print("Starting training with TD(0) - V(s)...")
     
     for episode in range(episodes):
         state, _ = env.reset()
@@ -30,18 +54,17 @@ def train(episodes=10000, alpha=0.1, gamma=0.99, epsilon=1.0, epsilon_decay=0.99
             if np.random.rand() < epsilon:
                 action = env.action_space.sample()
             else:
-                action = np.argmax(q_table[state])
+                action = get_best_action(env, state, v_table, gamma)
             
             next_state, reward, terminated, truncated, _ = env.step(action)
             done = terminated or truncated
             
-            # Q-Learning update rule
-            # Q(S, A) <- Q(S, A) + alpha * [R + gamma * max_a Q(S', a) - Q(S, A)]
-            best_next_action = np.argmax(q_table[next_state])
-            td_target = reward + gamma * q_table[next_state, best_next_action] * (not done)
-            td_error = td_target - q_table[state, action]
-            q_table[state, action] += alpha * td_error
-            
+            # TD(0) Update Rule for V(s)
+            # V(S) <- V(S) + alpha * [R + gamma * V(S') - V(S)]
+            td_target = reward + gamma * v_table[next_state] * (not done)
+            td_error = td_target - v_table[state]
+            v_table[state] += alpha * td_error
+            print(v_table)
             state = next_state
             total_reward += reward
             
@@ -55,16 +78,16 @@ def train(episodes=10000, alpha=0.1, gamma=0.99, epsilon=1.0, epsilon_decay=0.99
             
     print("Training finished.")
     
-    # Save Q-table
-    with open('q_table.pkl', 'wb') as f:
-        pickle.dump(q_table, f)
-    print("Q-table saved to q_table.pkl")
+    # Save V-table
+    with open('v_table.pkl', 'wb') as f:
+        pickle.dump(v_table, f)
+    print("V-table saved to v_table.pkl")
     
     # Plot results
     rolling_avg = np.convolve(rewards_history, np.ones(100)/100, mode='valid')
     plt.figure(figsize=(10, 5))
     plt.plot(rolling_avg)
-    plt.title("Rolling Average Reward (Window 100)")
+    plt.title("Rolling Average Reward (Window 100) - TD(0) V(s)")
     plt.xlabel("Episode")
     plt.ylabel("Reward")
     plt.savefig("training_plot.png")
